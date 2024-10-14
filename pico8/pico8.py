@@ -150,8 +150,12 @@ class Pico8(commands.Cog):
 
 
     async def cog_load(self):
-        await self.setup_pico8()
-        self.ready = True
+        try:
+            await self.setup_pico8()
+        except Exception as e:
+            #Moved self.read() = True from HERE to setup_pico8()
+            print("cog_load() error; FAILED await self.setup_pico8(): ", e)
+        
 
     async def cog_unload(self):
         shutil.rmtree(self.TEMP_FOLDER)
@@ -160,6 +164,7 @@ class Pico8(commands.Cog):
         if not os.path.exists(self.CONFIG_FILE):
             await self.runpico(self.INITIALIZER_P8, .5, 10, out_buffer=OutputBuffer())
             await asyncio.sleep(5)
+        self.ready = True
 
     def _parse_code(self, code):
         gfx_found = re.search(GFX_REGEX, code)
